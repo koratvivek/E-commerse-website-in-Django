@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Order Confirmation</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Order Confirmation</h2>
+    <p>Dear {{ customer.first_name }},</p>
+    <p>All your orders have been confirmed. Here are the details:</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.product.name }}</td>
+                <td>{{ order.product.price }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p><strong>Address:</strong> {{ address }}</p>
+    <p>Thank you for shopping with us!</p>
+</body>
+
+</html>

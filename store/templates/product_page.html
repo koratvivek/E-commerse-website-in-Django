@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Product{% endblock %}
+
+
+{% block content %}
+{% load static %}
+
+<head>
+
+    <link rel="stylesheet" href="{% static 'style/single_product.css' %}">
+</head>
+
+<body>
+    <main class="container">
+
+        <div class="left-column">
+            <img src="{{ product.image.url }}" alt="l">
+        </div>
+
+
+        <!-- Right Column -->
+        <div class="right-column">
+
+            <!-- Product Description -->
+            <div class="product-description">
+                <span>{{ product.category }}</span>
+                <h1>{{ product.name }}</h1>
+                <p>{{ product.description }}</p>
+            </div>
+
+            <!-- Product Configuration -->
+            <div class="product-configuration">
+                <!-- Product Color -->
+                <!-- Cable Configuration -->
+                <div class="cable-config">
+                    <a href="#">How to configurate your headphones</a>
+                </div>
+            </div>
+
+            <!-- Product Pricing -->
+            <div class="product-price">
+                <span>₹{{ product.price }}</span>
+                <a href="{% url 'add_to_cart' product.id %}" class="cart-btn">Add to cart</a>
+            </div>
+        </div>
+    </main>
+
+</body>
+{% endblock %}

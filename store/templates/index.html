@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+
+{% block content %}
+{% load static %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'style/products.css' %}">
+    <script>
+
+        function startTimer(endTime, timerElementId) {
+            const countDownDate = new Date(endTime).getTime();
+            console.log(endTime);
+            const x = setInterval(function () {
+                const now = new Date().getTime();
+                const distance = countDownDate - now;
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById(timerElementId).innerHTML = days + "d " + hours + "h "
+                    + minutes + "m " + seconds + "s ";
+
+                if (distance < 0) {
+                    clearInterval(x);
+                    document.getElementById(timerElementId).innerHTML = "EXPIRED";
+                }
+            }, 1000);
+        }
+        function initTimers() {
+            const products = document.querySelectorAll('.product');
+
+            products.forEach(product => {
+                const timerElement = product.querySelector('.timer');
+                const endTime = timerElement.dataset.endTime;
+
+                // Start the timer immediately
+                startTimer(endTime, timerElement.id);
+            });
+        }
+
+        // Initialize timers on page load
+        window.onload = initTimers;
+
+    </script>
+
+</head>
+
+<body>
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary">Action</button>
+        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"
+            aria-expanded="false">
+            <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu p-2">
+            <li>
+                <form method="get" action="." id="search-form">
+                    <div class="input-group">
+                        <input type="text" name="search" id="search-input" class="form-control" placeholder="Search"
+                            value="{{ search_query }}">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item"
+                    href="?ordering=price-asd{% if search_query %}&search={{ search_query }}{% endif %}">Price Low to
+                    High</a></li>
+            <li><a class="dropdown-item"
+                    href="?ordering=price-dec{% if search_query %}&search={{ search_query }}{% endif %}">Price High to
+                    Low</a></li>
+        </ul>
+    </div>
+    <main class="cd__main">
+        <div class="container-fluid bg-transparent my-4 p-3" style="position: relative" id="product-list">
+            <div class="row row-cols-1 row-cols-xs-2 row-cols-sm-2 row-cols-lg-4 g-3">
+                {% for product in product %}
+
+                <div class="col hp product">
+                    <div class="card h-100 shadow-sm">
+                        <a href="{% url 'single_product' product.id %}">
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" />
+                        </a>
+                        <div class="label-top shadow-sm">
+                            <a class="text-white" href="#">{{ product.name }}</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="clearfix mb-3">
+                                <span class="float-start badge rounded-pill bg-success">₹{{ product.price }}</span>
+                                <span class="float-end"><a href="#"
+                                        class="small text-muted text-uppercase aff-link">reviews</a></span>
+                            </div>
+                            <h5 class="card-title">
+                                <a target="_blank" href="#"> {{ product.description }} </a>
+                            </h5>
+                            <div class="d-grid gap-2 my-4">
+                                <button class="btn btn-warning bold-btn" value="{{product.id}}"> <a
+                                        href="{% url 'add_to_cart' product.id %}">add to
+                                        cart</a></button>
+                            </div>
+                            <div>
+                                <p>Bidding Ends: <span class="timer" id="timer-{{ product.id }}"
+                                        data-end-time="{{ product.bidding_end_time|date:'c' }}"></span></p>
+                            </div>
+                            <div class="clearfix mb-1">
+                                <span class="float-start"><a href="#"><i class="fas fa-question-circle"></i></a></span>
+                                <span class="float-end">
+                                    <i class="far fa-heart" style="cursor: pointer"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center mt-4">
+                    {% if product.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?{% if ordering_query %}ordering={{ ordering_query }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}page={{ product.previous_page_number }}">&laquo;</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-disabled="true">&laquo;</span>
+                    </li>
+                    {% endif %}
+
+                    <!-- Page Links -->
+                    {% load humanize %}
+
+                    {% if product.has_other_pages %}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% for page_num in product.paginator.page_range %}
+                            {% if page_num > product.number|add:-2 and page_num < product.number|add:2 %}
+                             {% if product.number == page_num %} <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ page_num }}</span>
+                                </li>
+                                {% else %}
+                                <li class="page-item">
+                                    <a class="page-link"
+                                        href="?{% if ordering_query %}ordering={{ ordering_query }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}page={{ page_num }}">
+                                        {{ page_num }}
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+
+                    <!-- Next Page Link -->
+                    {% if product.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?{% if ordering_query %}ordering={{ ordering_query }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}page={{ product.next_page_number }}">&raquo;</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-disabled="true">&raquo;</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </main>
+</body>
+
+
+{% endblock %}
